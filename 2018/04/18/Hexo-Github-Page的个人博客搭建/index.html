@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="[&quot;zh-CN&quot;,&quot;en&quot;,&quot;default&quot;]"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Hexo+Github Page的个人博客搭建 | Jackie blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-117749339-1','auto');ga('send','pageview');
+</script></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Hexo+Github Page的个人博客搭建</h1><a id="logo" href="/.">Jackie blogs</a><p class="description">Work through it, hang in three.</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Hexo+Github Page的个人博客搭建</h1><div class="post-meta">Apr 18, 2018<span> | </span><span class="category"><a href="/categories/tech/">tech</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2018/04/18/Hexo-Github-Page的个人博客搭建/" href="/2018/04/18/Hexo-Github-Page的个人博客搭建/#disqus_thread"></a><div class="post-content"><h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>最近开始各种地方准备春招，投递了不少简历，经历了不少面试，着实感觉自己很多地方的积累还是不够，后端研发或者是Java研发这一块，还有太多的细节没有弄清楚，很多框架的一些原理没有很好的理解，因此决定开一个博客，在平时的学习过程中不断积累，不断总结知识点。</p>
+<p>除去hexo配置完成后的“Hello World”文章，个人博客的第一篇文章就以“Hexo+Github Page配置个人博客”为主题了。</p>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>配置过程参考了很多现有的网站的一些过程</p>
+<p>完成的效果是在本地创建了一份Hexo工程，通过MarkDown创作，每次生成博客网站的内容，通过SSH方式远程部署到自己的USERNAME.GitHub.io的repo上。</p>
+<p>Hexo的初步配置参考： <a href="https://www.jianshu.com/p/e5f95eb990ad" target="_blank" rel="noopener">Mac下使用Hexo+Github搭建个人博客</a> 。</p>
+<p>初步完成后使用了 <a href="https://www.haomwei.com/technology/maupassant-hexo.html" target="_blank" rel="noopener">Maupassant</a> 主题，该主题很简洁容易上手，初步配置完成之后。</p>
+<p>后期有很多主题内评论、语言等配置，参考了<a href="https://github.com/handsdirty/hexo_blog" target="_blank" rel="noopener">Zhesong的配置过程</a> 。</p>
+<p><strong>详细的步骤在上述几个教程中都已经有了完备的描述</strong></p>
+<h2 id="发布文章"><a href="#发布文章" class="headerlink" title="发布文章"></a>发布文章</h2><pre><code>cd [hexo本地工程路径下] 
+hexo new post &apos;文章标题&apos;
+</code></pre><p>打开工程路径下的<code>/source/_posts/</code>路径，找到自己刚新建出来的文章，打开编辑内容。</p>
+<pre><code>hexo clean
+hexo generator / hexo g
+hexo deploy / hexo d
+</code></pre><p>这样的操作即可将新文章内容更新到个人的博客网站上。</p>
+<p>PS: 有一种方法可以在deploy之前预览到更新后的样子，执行完 <code>hexo generate</code> 后执行 <code>hexo server / hexo s</code> ，在浏览器输入 <a href="http://localhost:4000/" target="_blank" rel="noopener">http://localhost:4000/</a> 查看预览结果</p>
+<h2 id="立个Flag"><a href="#立个Flag" class="headerlink" title="立个Flag"></a>立个Flag</h2><p>每隔几天学习完一段时间后，坚持写个人的技术博客，在详细理解之后坚持原创，记录好自己的思路和理解，坚持！</p>
+</div><div class="tags"><a href="/tags/个人/">个人</a></div><div class="post-nav"><a class="next" href="/2018/04/17/hello-world/">Hello World</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = 'longcheng';
+var disqus_identifier = '2018/04/18/Hexo-Github-Page的个人博客搭建/';
+var disqus_title = 'Hexo+Github Page的个人博客搭建';
+var disqus_url = 'https://296245482.github.io/2018/04/18/Hexo-Github-Page的个人博客搭建/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/next/config.json',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//longcheng.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://296245482.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/个人/" style="font-size: 15px;">个人</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/18/Hexo-Github-Page的个人博客搭建/">Hexo+Github Page的个人博客搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/17/hello-world/">Hello World</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//longcheng.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">Jackie blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
