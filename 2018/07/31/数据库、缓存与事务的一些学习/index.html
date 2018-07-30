@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="[&quot;zh-CN&quot;,&quot;en&quot;,&quot;default&quot;]"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>数据库、缓存与事务的一些学习 | Jackie blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-117749339-1','auto');ga('send','pageview');
+</script></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">数据库、缓存与事务的一些学习</h1><a id="logo" href="/.">Jackie blogs</a><p class="description">Work through it, hang in three.</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">数据库、缓存与事务的一些学习</h1><div class="post-meta">Jul 31, 2018<span> | </span><span class="category"><a href="/categories/tech/">tech</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2018/07/31/数据库、缓存与事务的一些学习/" href="/2018/07/31/数据库、缓存与事务的一些学习/#disqus_thread"></a><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存同步的两个主流策略"><span class="toc-number">1.</span> <span class="toc-text">缓存同步的两个主流策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Set策略"><span class="toc-number">1.1.</span> <span class="toc-text">Set策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Delete策略"><span class="toc-number">1.2.</span> <span class="toc-text">Delete策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存的使用事项"><span class="toc-number">2.</span> <span class="toc-text">缓存的使用事项</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存击穿"><span class="toc-number">2.1.</span> <span class="toc-text">缓存击穿</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存雪崩"><span class="toc-number">2.2.</span> <span class="toc-text">缓存雪崩</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL事务"><span class="toc-number">3.</span> <span class="toc-text">MySQL事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#事务"><span class="toc-number">3.1.</span> <span class="toc-text">事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据库并发的问题"><span class="toc-number">3.2.</span> <span class="toc-text">数据库并发的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#丢失更新："><span class="toc-number">3.2.1.</span> <span class="toc-text">丢失更新：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#脏读："><span class="toc-number">3.2.2.</span> <span class="toc-text">脏读：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#不可重复读："><span class="toc-number">3.2.3.</span> <span class="toc-text">不可重复读：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#幻读"><span class="toc-number">3.2.4.</span> <span class="toc-text">幻读</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事务隔离级别"><span class="toc-number">3.3.</span> <span class="toc-text">事务隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#REF"><span class="toc-number">3.4.</span> <span class="toc-text">REF</span></a></li></ol></li></ol></div></div><div class="post-content"><h2 id="缓存同步的两个主流策略"><a href="#缓存同步的两个主流策略" class="headerlink" title="缓存同步的两个主流策略"></a>缓存同步的两个主流策略</h2><p>在不同的请求并行的向缓存请求和更新数据时，因为一些诡异的时序安排，很容易引起某一个请求读到脏数据的情况</p>
+<h3 id="Set策略"><a href="#Set策略" class="headerlink" title="Set策略"></a>Set策略</h3><blockquote>
+<p>查询时，先查缓存，命中直接返回，不命中查数据库，并将数据库的值<strong>set</strong>到缓存中<br>更新时，先更新数据库，再将值<strong>set</strong>到缓存中</p>
+</blockquote>
+<p>这种方法只适合读多写少的情况，保持缓存在大多数时间都是可以取得到值的。其他情况下经常会出现缓存不一致问题，该方法还是需要慎用。</p>
+<h3 id="Delete策略"><a href="#Delete策略" class="headerlink" title="Delete策略"></a>Delete策略</h3><p>Delete策略分为两种，主要的区别在于淘汰缓存的时机：</p>
+<blockquote>
+<p>查询时，和set策略一致，先查缓存，不命中查数据库，并将值写到缓存</p>
+</blockquote>
+<p>第一种：</p>
+<blockquote>
+<p>更新时，先淘汰缓存，再更新数据库</p>
+</blockquote>
+<p>这种情况下，会有A淘汰缓存后，B缓存不命中，从数据库中将值更新到缓存，A再更新数据库的情况。这种情况下，有一种叫<strong>延时淘汰</strong>机制，在更新情况下，可以设计一个异步操作，休眠1s再次淘汰缓存，但如果第二次淘汰发生错误了，依旧还是会产生不一致的问题。</p>
+<p>第二种：</p>
+<blockquote>
+<p>更新时，先更新数据库，再淘汰缓存</p>
+</blockquote>
+<p>这种策略解决了delete策略第一种提到的问题，但也有新的问题，比如A查询没命中缓存去查数据库，读到一个旧值，此时B将新值写入数据库，然后淘汰缓存，此时A再将读到的值更新到缓存，同样产生了不一致。但此时的情况比上面的情况好很多，因为出现的概率会小很多，A的查询数据库时间是远小于B的写数据库的时间。</p>
+<p>但是，如果一定要解决这个问题，同样可以参考delete策略中的第一种里面的延时删除策略，每次发起更新时，更新数据库并且淘汰缓存后，添加一个异步的消息队列，在一定的延时后再次淘汰缓存即可解决问题。</p>
+<p><strong>值得一提的是，现在比较公认的更新策略最后一种，来自于<a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/cache-aside" target="_blank" rel="noopener">Cache-Aside pattern</a>，并且有如下缓存数据库同步策略的定义：</strong></p>
+<ol>
+<li>失效：从cache读取，没命中，读数据库，成功后将值放入缓存。</li>
+<li>命中：从cache读取，命中并返回。</li>
+<li>更新：把要更新的数据先存到数据库，成功后让缓存失效。</li>
+</ol>
+<h2 id="缓存的使用事项"><a href="#缓存的使用事项" class="headerlink" title="缓存的使用事项"></a>缓存的使用事项</h2><h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><p>一个写多读少的业务流程，需要经常更新数据库并且淘汰缓存，在做查询的时候，大多数时候都是缓存未命中，导致大部分请求全部打到数据库上。</p>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><p>一批缓存使用了相同的过期时间，导致某一个时刻，一大批缓存过期失效，请求全部转发到数据库，导致数据库压力徒增。</p>
+<h2 id="MySQL事务"><a href="#MySQL事务" class="headerlink" title="MySQL事务"></a>MySQL事务</h2><h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>原子性、一致性、隔离性、持久性</p>
+<h3 id="数据库并发的问题"><a href="#数据库并发的问题" class="headerlink" title="数据库并发的问题"></a>数据库并发的问题</h3><blockquote>
+<h4 id="丢失更新："><a href="#丢失更新：" class="headerlink" title="丢失更新："></a>丢失更新：</h4><p>第一类丢失更新：在没有事务隔离的情况下，AB同时操作某个值，同时读取，B做出修改并且提交更改，A发生异常回滚数据，导致B已完成的数据更新丢失。</p>
+<p>第二类丢失更新：同上述例子，AB同时更新某值，在B提交更新之后，A也提交更新，B提交的更新就被A提交的覆盖。</p>
+</blockquote>
+<blockquote>
+<h4 id="脏读："><a href="#脏读：" class="headerlink" title="脏读："></a>脏读：</h4><p>A对某一数据进行了修改，但是该修改还未提交数据库，这时B也访问该数据，然后使用了这个还没有成功更新的新数据，读到了脏数据。</p>
+</blockquote>
+<blockquote>
+<h4 id="不可重复读："><a href="#不可重复读：" class="headerlink" title="不可重复读："></a>不可重复读：</h4><p>AB同时操作一段数据，A在一次操作中需要多次读取该数据，但是在这期间，B修改了该值并且完成了提交，这样A下次读到的数据就不一样。</p>
+</blockquote>
+<blockquote>
+<h4 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h4><p>同样也是AB同时操作一段数据，但和不可重复读不同的是，B不是对某数据的值进行修改，而是新增或者删除了某数据，A在这前后读取到的数据记录数发生了变化，这要区别于不可重复读。</p>
+</blockquote>
+<h3 id="事务隔离级别"><a href="#事务隔离级别" class="headerlink" title="事务隔离级别"></a>事务隔离级别</h3><ul>
+<li>READ_UNCOMMITTED 未提交读</li>
+</ul>
+<p>允许其他事物读到未提交的数据</p>
+<ul>
+<li>READ_COMMITTED 提交读</li>
+</ul>
+<p>保证数据得到提交后才能被另一个事务读取到</p>
+<ul>
+<li>REPEATABLE_READ 可重复读</li>
+</ul>
+<p>保证一个事务在前后两次获取到的数据都是一样的</p>
+<ul>
+<li>SERIALIZABLE 顺序读</li>
+</ul>
+<p>事务的处理串行化</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">第一类丢失更新</th>
+<th style="text-align:center">脏读</th>
+<th style="text-align:center">不可重复读</th>
+<th style="text-align:center">第二类丢失更新</th>
+<th style="text-align:center">幻读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">未提交读</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">提交读</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">可重复读</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">串行化</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+</tr>
+</tbody>
+</table>
+<p><strong>MySQL采用的默认隔离级别是可重复读级别</strong></p>
+<h3 id="REF"><a href="#REF" class="headerlink" title="REF"></a>REF</h3><ol>
+<li><a href="https://www.cnblogs.com/johnsblog/p/6426287.html" target="_blank" rel="noopener">https://www.cnblogs.com/johnsblog/p/6426287.html</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MjM5ODYxMDA5OQ==&amp;mid=404308725&amp;idx=1&amp;sn=1a25ce76dd1956014ceb8a011855268e&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MjM5ODYxMDA5OQ==&amp;mid=404308725&amp;idx=1&amp;sn=1a25ce76dd1956014ceb8a011855268e&amp;scene=21#wechat_redirect</a></li>
+<li><a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/cache-aside" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/azure/architecture/patterns/cache-aside</a></li>
+<li><a href="https://blog.csdn.net/d8111/article/details/2595635" target="_blank" rel="noopener">https://blog.csdn.net/d8111/article/details/2595635</a></li>
+</ol>
+</div><div class="tags"><a href="/tags/DataBase-MySQL-Redis/">DataBase, MySQL, Redis</a></div><div class="post-nav"><a class="next" href="/2018/07/04/SQL语句写法优化/">SQL语句写法优化</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = 'longcheng';
+var disqus_identifier = '2018/07/31/数据库、缓存与事务的一些学习/';
+var disqus_title = '数据库、缓存与事务的一些学习';
+var disqus_url = 'https://296245482.github.io/2018/07/31/数据库、缓存与事务的一些学习/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/next/config.json',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//longcheng.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://296245482.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/个人/" style="font-size: 15px;">个人</a> <a href="/tags/blog/" style="font-size: 15px;">blog</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/DataBase-MySQL-Redis/" style="font-size: 15px;">DataBase, MySQL, Redis</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/DataBase/" style="font-size: 15px;">DataBase</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/07/31/数据库、缓存与事务的一些学习/">数据库、缓存与事务的一些学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/07/04/SQL语句写法优化/">SQL语句写法优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/06/12/Java容器源码阅读记录/">Java容器源码阅读记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/05/31/避免嵌套条件式/">避免嵌套条件式</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/05/08/TCP:UDP实现可靠的传输/">TCP/UDP & 可靠的传输</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/24/Markdown一些不常见的小技巧/">Markdown学习，一些常用小技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/18/Hexo-Github-Page的个人博客搭建/">Hexo+Github Page的个人博客搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/04/17/hello-world/">Hello World</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://296245482.github.io/CV/" title="我的简历" target="_blank">我的简历</a><ul></ul><a href="https://github.com/296245482" title="GitHub地址" target="_blank">GitHub地址</a><ul></ul><a href="https://weibo.com/JackieChannnnn" title="微博地址" target="_blank">微博地址</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">Jackie blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
