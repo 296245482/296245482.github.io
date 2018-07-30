@@ -34,7 +34,11 @@
       <category term="tech" scheme="https://296245482.github.io/categories/tech/"/>
     
     
-      <category term="DataBase, MySQL, Redis" scheme="https://296245482.github.io/tags/DataBase-MySQL-Redis/"/>
+      <category term="DataBase" scheme="https://296245482.github.io/tags/DataBase/"/>
+    
+      <category term="MySQL" scheme="https://296245482.github.io/tags/MySQL/"/>
+    
+      <category term="Redis" scheme="https://296245482.github.io/tags/Redis/"/>
     
   </entry>
   
