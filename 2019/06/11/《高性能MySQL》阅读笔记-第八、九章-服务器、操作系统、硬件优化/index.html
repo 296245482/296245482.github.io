@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="[&quot;zh-CN&quot;,&quot;en&quot;,&quot;default&quot;]"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>《高性能MySQL》阅读笔记 第八、九章 服务器、操作系统、硬件优化 | Jackie's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-117749339-1','auto');ga('send','pageview');
+</script></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">《高性能MySQL》阅读笔记 第八、九章 服务器、操作系统、硬件优化</h1><a id="logo" href="/.">Jackie's blogs</a><p class="description">佛系更新，欢迎交流</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">《高性能MySQL》阅读笔记 第八、九章 服务器、操作系统、硬件优化</h1><div class="post-meta">Jun 11, 2019<span> | </span><span class="category"><a href="/categories/tech/">tech</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2019/06/11/《高性能MySQL》阅读笔记-第八、九章-服务器、操作系统、硬件优化/" href="/2019/06/11/《高性能MySQL》阅读笔记-第八、九章-服务器、操作系统、硬件优化/#disqus_thread"></a><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL配置原理"><span class="toc-number">1.</span> <span class="toc-text">MySQL配置原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-I-O配置"><span class="toc-number">2.</span> <span class="toc-text">MySQL I/O配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL并发配置"><span class="toc-number">3.</span> <span class="toc-text">MySQL并发配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#固态硬盘的优化"><span class="toc-number">4.</span> <span class="toc-text">固态硬盘的优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#硬件优化总结"><span class="toc-number">5.</span> <span class="toc-text">硬件优化总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ref"><span class="toc-number">6.</span> <span class="toc-text">Ref</span></a></li></ol></div></div><div class="post-content"><p>MySQL服务器配置的学习应该是从MySQL内核和行为开始，然后利用这些知识来指导配置MySQL。如果配置不单单考察硬件，配置情况应该更加符合服务器的工作负载、数据和应用需求。配置项只需要修改基本项即可，不应该随便修改，否则会引起很多意料外的问题。多数情况下默认的配置项即可。</p>
+<p>一般不建议通过寻找有问题的地方来修改配置项，最好还是从查询语句和相应时间入手开始分析。</p>
+<p><strong><em> 本篇从原书第八、九章展开，省略了很多的内容和章节，只选取了自己感觉日常可能会涉及的部分做了简要的记录。 </em></strong></p>
+<h2 id="MySQL配置原理"><a href="#MySQL配置原理" class="headerlink" title="MySQL配置原理"></a>MySQL配置原理</h2><p>配置信息可以从命令行参数设置或者是在配置文件中设置。</p>
+<p>做动态设置务必小心，在线更改设置可能会导致数据库做大量的工作，例如从缓存中刷新脏块。实际操作中都需要详细了解设置更改的立即后果，了解后果再行动。</p>
+<p>硬件上及时性能翻倍，例如内存大小翻倍了，但是配置的设置不是简单的乘2这么简单，有可能导致超过地址空间等问题。除非是硬件、工作负载和数据是完全静态的，否则都可能需要重新检查配置文件。</p>
+<p>一个完美的配置可能需要不断的通过基准测试迭代验证来获得，需要大量的工作和研究，大部分情况下收益很小，不如把时间花费在检查备份、监控执行计划上。</p>
+<h2 id="MySQL-I-O配置"><a href="#MySQL-I-O配置" class="headerlink" title="MySQL I/O配置"></a>MySQL I/O配置</h2><p>这些配置影响着MySQL怎样同步数据到磁盘以及如何做恢复操作，I/O操作是代价很大的，如果可以冒一点点风险让数据没有立即持久化到磁盘是，就可以增加并发性和减少I/O等待，配置MySQL I/O也就是多大的持久化风险和高并发性的平衡。</p>
+<ul>
+<li>InnoDB事务</li>
+</ul>
+<p>“把日志缓冲写到日志文件”和“把日志刷新到持久化存储”这两者是不同的，写进日志文件只是简单的把数据从InnoDB的内存缓冲转移到操作系统的缓存，并没有把数据写到持久化存储。把日志刷新到持久话存储意味着InnoDB请求操作系统把数据刷出缓存，并且确认写到了磁盘。</p>
+<p>上述日志缓冲刷新到持久化存储中，以求提交的事务全部被持久这一过程，在持久化的实效和性能之间如果有权衡的的话可以通过设置innodb_flush_log_at_trx_commit变量来控制日志缓冲刷新的频繁程度。</p>
+<ul>
+<li>InnoDB表空间</li>
+</ul>
+<p>InnoDB把数据保存在表空间内，本质上是有一个或者多个磁盘文件组成的虚拟文件系统。InnoDB用表空间实现很多功能，不只是存储表和索引，还保存回滚日志、插入缓存、双写缓冲。</p>
+<h2 id="MySQL并发配置"><a href="#MySQL并发配置" class="headerlink" title="MySQL并发配置"></a>MySQL并发配置</h2><ul>
+<li>InnoDB并发设置</li>
+</ul>
+<p>在高并发的场景下，因为并发导致的性能降低，唯一的解决办法是限制并发，升级服务器。InnoDB有自己的“线程调度器”控制线程怎么进入内核访问数据、以及他们在内核中一次可以做什么，这其中限制多少线程进入内核是可配置的。同时还可以设置提交阶段的并发数。</p>
+<ul>
+<li>MyISAM并发配置</li>
+</ul>
+<p>MyISAM不像InnoDB样支持MVCC，虽然也是表级锁，但只有插入操作是在表的末尾才能支持并发插入。MyISAM可以设置一个并发插入变量限制并发程度。</p>
+<h2 id="固态硬盘的优化"><a href="#固态硬盘的优化" class="headerlink" title="固态硬盘的优化"></a>固态硬盘的优化</h2><p>InnoDB的默认配置是为硬盘驱动器定制的，在固态硬盘上使用旧版MySQL时需要作这类改进：增加I/O容量、设置更大的InnoDB文件、把而至今日志文件转移到RAID卷节省更多的闪存设备性能、禁用预读、禁用双写缓存、限制插入缓存大小等。</p>
+<h2 id="硬件优化总结"><a href="#硬件优化总结" class="headerlink" title="硬件优化总结"></a>硬件优化总结</h2><p>MySQL需要的四种资源是：CPU、内存、硬盘、网络资源，网络一般不会作为很严重的瓶颈出现。对CPU而言，一般会选择更快而不是更多。CPU、内存、磁盘三者在性能上的关系错综复杂，某个部分不足的话可能会在其他地方显现出来问题，具体在某些场景下也应该详细分析例如工作集大小等来决定具体的配置方案。</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p>BaronSchwartz, PeterZaitsev, VadimTkachenko, et al. 高性能MySQL[M]. 电子工业出版社, 2013.</p>
+</div><div class="tags"><a href="/tags/DB/">DB</a><a href="/tags/MySQL/">MySQL</a></div><div class="post-nav"><a class="next" href="/2019/06/04/《高性能MySQL》阅读笔记-第七章-MySQL高级特性/">《高性能MySQL》阅读笔记 第七章 MySQL高级特性</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = 'longcheng';
+var disqus_identifier = '2019/06/11/《高性能MySQL》阅读笔记-第八、九章-服务器、操作系统、硬件优化/';
+var disqus_title = '《高性能MySQL》阅读笔记 第八、九章 服务器、操作系统、硬件优化';
+var disqus_url = 'https://296245482.github.io/2019/06/11/《高性能MySQL》阅读笔记-第八、九章-服务器、操作系统、硬件优化/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/next/config.json',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//longcheng.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://296245482.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/OS/" style="font-size: 15px;">OS</a> <a href="/tags/个人/" style="font-size: 15px;">个人</a> <a href="/tags/blog/" style="font-size: 15px;">blog</a> <a href="/tags/DB/" style="font-size: 15px;">DB</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/06/11/《高性能MySQL》阅读笔记-第八、九章-服务器、操作系统、硬件优化/">《高性能MySQL》阅读笔记 第八、九章 服务器、操作系统、硬件优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/04/《高性能MySQL》阅读笔记-第七章-MySQL高级特性/">《高性能MySQL》阅读笔记 第七章 MySQL高级特性</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/25/《高性能MySQL》阅读笔记-第六章-查询性能优化/">《高性能MySQL》阅读笔记 第六章 查询性能优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/30/《高性能MySQL》阅读笔记-第五章-创建高性能索引/">《高性能MySQL》阅读笔记 第五章 创建高性能索引</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/28/MySQL单条SQL性能查询/">MySQL单SQL查询剖析</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/24/Java实现LRU算法/">Java实现LRU算法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/07/31/数据库、缓存与事务的一些学习/">数据库、缓存与事务的一些学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/07/04/SQL语句写法优化/">SQL语句写法优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/06/12/Java容器源码阅读记录/">Java容器源码阅读记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/05/31/避免嵌套条件式/">避免嵌套条件式</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://296245482.github.io/CV/" title="我的简历" target="_blank">我的简历</a><ul></ul><a href="https://github.com/296245482" title="GitHub地址" target="_blank">GitHub地址</a><ul></ul><a href="https://weibo.com/JackieChannnnn" title="微博地址" target="_blank">微博地址</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2019 <a href="/." rel="nofollow">Jackie's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
